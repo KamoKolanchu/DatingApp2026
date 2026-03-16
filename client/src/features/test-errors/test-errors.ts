@@ -46,7 +46,7 @@ export class TestErrors {
   get400ValidationError() {
     this.http.post(this.baseUrl + 'account/register', {}).subscribe({
       next: (response) => console.log(response),
-      error: (error) => console.log(error),
+      error: (error) =>{console.log(error); this.validationErrors.set(error);} 
     });
   }
 }
