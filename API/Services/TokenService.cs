@@ -1,18 +1,20 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using API.Entities;
 using API.Interfaces;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 
 namespace API.Services
-{ 
-    public class TokenService(IConfiguration config): ITokenService
+{
+    public class TokenService(IConfiguration config, UserManager<AppUser> userManager) : ITokenService
     {
-        public string CreateToken(AppUser user)
+        public async Task<string> CreateToken(AppUser user)
         {
             var tokenKey = config["TokenKey"] ?? throw new Exception("Cannot get token key");
-            if (tokenKey.Length < 64) 
+            if (tokenKey.Length < 64)
                 throw new Exception("Your token key needs to be >= 64 characters");
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenKey));
@@ -20,9 +22,13 @@ namespace API.Services
             // Add claims
             var claims = new List<Claim>
             {
-                new(ClaimTypes.Email, user.Email),
+                new(ClaimTypes.Email, user.Email!),
                 new(ClaimTypes.NameIdentifier, user.Id)
             };
+
+            var roles = await userManager.GetRolesAsync(user);
+
+            claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
 
             // Create credentials
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
@@ -31,7 +37,7 @@ namespace API.Services
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddDays(7),
+                Expires = DateTime.UtcNow.AddMinutes(7),
                 SigningCredentials = creds
             };
 
@@ -43,6 +49,12 @@ namespace API.Services
 
             // Return the written token
             return tokenHandler.WriteToken(token);
+        }
+
+        public string GenerateRefreshToken()
+        {
+            var randomBytes = RandomNumberGenerator.GetBytes(64);
+            return Convert.ToBase64String(randomBytes);
         }
     }
 }
