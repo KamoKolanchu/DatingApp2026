@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers;
 
-public class AccountController(UserManager<AppUser> userManager, ITokenService tokenService,  IWebHostEnvironment env) : BaseApiController
+public class AccountController(UserManager<AppUser> userManager, ITokenService tokenService) : BaseApiController
 {
     [HttpPost("register")] // api/account/register
     public async Task<ActionResult<UserDto>> Register(RegisterDto registerDto)
@@ -62,7 +62,7 @@ public class AccountController(UserManager<AppUser> userManager, ITokenService t
        return await user.ToDto(tokenService);   
     }
 
-      private async Task SetRefreshTokenCookie(AppUser user)
+     private async Task SetRefreshTokenCookie(AppUser user)
     {
         var refreshToken = tokenService.GenerateRefreshToken();
         user.RefreshToken = refreshToken;
@@ -72,15 +72,13 @@ public class AccountController(UserManager<AppUser> userManager, ITokenService t
         var cookieOptions = new CookieOptions
         {
             HttpOnly = true,
-            Secure = !env.IsDevelopment(),          // HTTPS in production
-            SameSite = env.IsDevelopment() 
-                ? SameSiteMode.Lax                  // safer default for HTTP scenarios
-                : SameSiteMode.Strict,
+            Secure = true,
+            SameSite = SameSiteMode.Strict,
             Expires = DateTime.UtcNow.AddDays(7)
         };
 
         Response.Cookies.Append("refreshToken", refreshToken, cookieOptions);
-    }  
+    }
 
     [HttpPost("refresh-token")]
     public async Task<ActionResult<UserDto>> RefreshToken()

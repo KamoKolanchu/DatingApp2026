@@ -1,10 +1,11 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ToastService {
-
+private router = inject(Router); 
   constructor() {
     this.createToastContainer();
   }
@@ -18,12 +19,12 @@ export class ToastService {
     }
   }
 
-  private createToastElement(message: string, alertClass: string, duration = 5000) {
+  private createToastElement(message: string, alertClass: string, duration = 5000, avatar?: string, route?: string) {
     const toastContainer = document.getElementById('toast-container');
     if (!toastContainer) return;
     
     const toast = document.createElement('div');
-    toast.classList.add('alert', alertClass, 'shadow-lg');
+    toast.classList.add('alert', alertClass, 'shadow-lg', 'flex', 'items-center', 'gap-3', 'cursor-pointer');
     toast.innerHTML = `
       <span>${message}</span>
       <button class="ml-4 btn btn-sm btn-ghost">x</button>

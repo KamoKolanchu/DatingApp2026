@@ -23,13 +23,13 @@
           "path": "src/core/interceptors"
         },
         "@schematics/angular:resolver": {
-          "skipTests": true, 
+          "skipTests": true,
           "path": "src"
         },
         "@schematics/angular:pipe": {
           "skipTests": true,
           "path": "src/core/pipes"
-        }, 
+        },
         "@schematics/angular:directive": {
           "skipTests": true,
           "path": "src/shared/directives"
@@ -86,6 +86,11 @@
         },
         "serve": {
           "builder": "@angular/build:dev-server",
+          "options": {
+            "ssl": true,
+            "sslCert": "localhost.pem",
+            "sslKey": "localhost-key.pem"
+          },
           "configurations": {
             "production": {
               "buildTarget": "client:build:production"
