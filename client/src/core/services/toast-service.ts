@@ -25,7 +25,13 @@ private router = inject(Router);
     
     const toast = document.createElement('div');
     toast.classList.add('alert', alertClass, 'shadow-lg', 'flex', 'items-center', 'gap-3', 'cursor-pointer');
+
+    if(route){
+      toast.addEventListener('click', () => this.router.navigateByUrl(route));
+    }
+
     toast.innerHTML = `
+      ${avatar ? `<img src=${avatar || '/user.png'} class='h-10 w-10 rounded'` : ''}
       <span>${message}</span>
       <button class="ml-4 btn btn-sm btn-ghost">x</button>
     `
@@ -43,20 +49,20 @@ private router = inject(Router);
     }, duration);
   }
 
-  success(message: string, duration?: number) {
-    this.createToastElement(message, 'alert-success', duration);
+  success(message: string, duration?: number, avatar?: string, route?: string) {
+    this.createToastElement(message, 'alert-success', duration, avatar, route);
   }
 
-  error(message: string, duration?: number) {
-    this.createToastElement(message, 'alert-error', duration);
+  error(message: string, duration?: number, avatar?: string, route?: string) {
+    this.createToastElement(message, 'alert-error', duration, avatar, route);
   }
 
-  warning(message: string, duration?: number) {
-    this.createToastElement(message, 'alert-warning', duration);
+  warning(message: string, duration?: number, avatar?: string, route?: string) {
+    this.createToastElement(message, 'alert-warning', duration, avatar, route);
   }
 
-  info(message: string, duration?: number) {
-    this.createToastElement(message, 'alert-info', duration);
+  info(message: string, duration?: number, avatar?: string, route?: string) {
+    this.createToastElement(message, 'alert-info', duration, avatar, route);
   }
   
 }

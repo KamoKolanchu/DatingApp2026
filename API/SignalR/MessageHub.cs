@@ -8,22 +8,21 @@ using Microsoft.AspNetCore.SignalR;
 namespace API.SignalR;
 
 [Authorize]
-public class MessageHub(IMessageRepository messageRepository, 
-    IMemberRepository memberRepository, 
+public class MessageHub(IMessageRepository messageRepository,
+    IMemberRepository memberRepository,
     IHubContext<PresenceHub> presenceHub) : Hub
 {
 
     public override async Task OnConnectedAsync()
     {
         var httpContext = Context.GetHttpContext();
-        var otherUser = httpContext?.Request?.Query["userId"].ToString() 
+        var otherUser = httpContext?.Request?.Query["userId"].ToString()
             ?? throw new HubException("Other user not found");
 
         var groupName = GetGroupName(GetUserId(), otherUser);
 
-        await AddToGroup(groupName);
-
         await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
+        await AddToGroup(groupName);
 
         var messages = await messageRepository
             .GetMessageThread(GetUserId(), otherUser!);
@@ -36,7 +35,7 @@ public class MessageHub(IMessageRepository messageRepository,
         var sender = await memberRepository.GetMemberByIdAsync(GetUserId());
         var recipient = await memberRepository.GetMemberByIdAsync(createMessageDto.RecipientId);
 
-        if (recipient == null || sender == null || sender.Id == createMessageDto.RecipientId) 
+        if (recipient == null || sender == null || sender.Id == createMessageDto.RecipientId)
             throw new HubException("Cannot send this message");
 
         var message = new Message
@@ -50,18 +49,18 @@ public class MessageHub(IMessageRepository messageRepository,
         var group = await messageRepository.GetMessageGroup(groupName);
         var userInGroup = group != null && group.Connections.Any(x => x.UserId == message.RecipientId);
 
-        if(userInGroup)
+        if (userInGroup)
         {
-            message.DateRead = DateTime.UtcNow; 
+            message.DateRead = DateTime.UtcNow;
         }
 
         messageRepository.AddMessage(message);
 
         if (await messageRepository.SaveAllAsync())
         {
-            await Clients.Group(groupName).SendAsync("NewMessage", message.ToDto()); 
+            await Clients.Group(groupName).SendAsync("NewMessage", message.ToDto());
             var connections = await PresenceTracker.GetConnectionsForUser(recipient.Id);
-            if(connections != null && connections.Count > 0 && !userInGroup)
+            if (connections != null && connections.Count > 0 && !userInGroup)
             {
                 await presenceHub.Clients.Clients(connections)
                     .SendAsync("NewMessageReceived", message.ToDto());
