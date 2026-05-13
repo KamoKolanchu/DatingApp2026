@@ -1,48 +1,59 @@
 @if (memberService.member(); as member) {
-    <div class="flex gap-6 h-[85vh]">
-        <div class="card bg-base-100 flex flex-col w-1/4 h-full">
-           <img src="{{member.imageUrl || '/user.png'}}" alt="image of member"
-    class="rounded-full mx-auto mt-3 object-cover w-46 h-46">
-            <div class="card-body flex-1 overflow-y-auto">
-                <div class="flex flex-col items-center">
-                    <div class="flex text-2xl text-primary items-center">
-                        {{member.displayName}}, {{member.dateOfBirth | age}}
-                        @if(presenceService.onlineUsers().includes(member.id)){
-                            <span class="status status-success status-xl ml-3"></span>
-                        }
-                    </div>
+  <div class="flex gap-6 h-[85vh]">
+    <div class="card bg-base-100 flex flex-col w-1/4 h-full">
+      <img
+        src="{{ member.imageUrl || '/user.png' }}"
+        alt="image of member"
+        class="rounded-full mx-auto mt-3 object-cover w-46 h-46"
+      />
+      <div class="card-body flex-1 overflow-y-auto">
+        <div class="flex flex-col items-center">
+          <div class="flex text-2xl text-primary items-center">
+            {{ member.displayName }}, {{ member.dateOfBirth | age }}
+            @if (presenceService.onlineUsers().includes(member.id)) {
+              <span class="status status-success status-xl ml-3"></span>
+            }
+          </div>
 
-                    <div class="text-sm">
-                        {{member.city}}, {{member.country}}
-                    </div>
-                </div>
-                <div class="divider"></div>
-                <ul class="menu rounded-box w-full text-xl">
-                    <li><a routerLink="profile" routerLinkActive="text-primary">Profile</a></li>
-                    <li><a routerLink="photos" routerLinkActive="text-primary">Photos</a></li>
-                    <li><a routerLink="messages" routerLinkActive="text-primary">Messages</a></li>
-                </ul>
-            </div>
-            <div class="card-actions justify-between gap-2 px-2 mb-3">
-                <button class="btn btn-info flex-1">Go back</button>
-                <button class="btn btn-primary flex-1">Like user</button>
-            </div>
+          <div class="text-sm">{{ member.city }}, {{ member.country }}</div>
         </div>
-        <div class="card bg-base-100 w-3/4 p-6 flex flex-col h-full">
-            <div class="flex justify-between items-center shrink-0">
-                <h3 class="card-title text-3xl text-primary">{{title()}}</h3>
-                @if (isCurrentUser()){
-                    <button class="btn btn-outline btn-primary"
-                    (click)="memberService.editMode.set(!memberService.editMode())"
-                    >{{memberService.editMode() ? 'Cancel' : 'Edit'}}</button>
-                }
-            </div>
-            <div class="divider shrink-0"></div>
-            <div class="flex-1 overflow-y-auto">
-                <router-outlet />
-            </div>
-        </div>
+        <div class="divider"></div>
+        <ul class="menu rounded-box w-full text-xl">
+          <li><a routerLink="profile" routerLinkActive="text-primary">Profile</a></li>
+          <li><a routerLink="photos" routerLinkActive="text-primary">Photos</a></li>
+          <li><a routerLink="messages" routerLinkActive="text-primary">Messages</a></li>
+        </ul>
+      </div>
+      <div class="card-actions justify-between gap-2 px-2 mb-3">
+        <button routerLink="/members" class="btn btn-info flex-1">Go back</button>
+        <button
+          (click)="likeService.toggleLike(member.id)"
+          [class.btn-error]="hasLiked()"
+          [class.btn-success]="!hasLiked()"
+          class="btn flex-1"
+        >
+          {{ hasLiked() ? 'Remove like' : 'Like User' }}
+        </button>
+      </div>
     </div>
+    <div class="card bg-base-100 w-3/4 p-6 flex flex-col h-full">
+      <div class="flex justify-between items-center shrink-0">
+        <h3 class="card-title text-3xl text-primary">{{ title() }}</h3>
+        @if (isCurrentUser()) {
+          <button
+            class="btn btn-outline btn-primary"
+            (click)="memberService.editMode.set(!memberService.editMode())"
+          >
+            {{ memberService.editMode() ? 'Cancel' : 'Edit' }}
+          </button>
+        }
+      </div>
+      <div class="divider shrink-0"></div>
+      <div class="flex-1 overflow-y-auto">
+        <router-outlet />
+      </div>
+    </div>
+  </div>
 } @else {
-    <div>Member not found</div>
+  <div>Member not found</div>
 }

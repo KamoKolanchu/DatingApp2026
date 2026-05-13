@@ -2,6 +2,7 @@ using API.DTOs;
 using API.Entities;
 using API.Extensions;
 using API.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -21,9 +22,9 @@ public class AccountController(UserManager<AppUser> userManager, ITokenService t
             Member = new Member
             {
                 DisplayName = registerDto.DisplayName,
-                Gender = registerDto.Gender, 
+                Gender = registerDto.Gender,
                 City = registerDto.City,
-                Country = registerDto.Country, 
+                Country = registerDto.Country,
                 DateOfBirth = registerDto.DateOfBirth
             }
         };
@@ -32,24 +33,24 @@ public class AccountController(UserManager<AppUser> userManager, ITokenService t
 
         if (!result.Succeeded)
         {
-            foreach(var error in result.Errors)
+            foreach (var error in result.Errors)
             {
                 ModelState.AddModelError("identity", error.Description);
             }
-            return ValidationProblem(); 
+            return ValidationProblem();
         }
 
         await userManager.AddToRoleAsync(user, "Member");
 
         await SetRefreshTokenCookie(user);
 
-        return await user.ToDto(tokenService);    
+        return await user.ToDto(tokenService);
     }
 
-     [HttpPost("login")] // POST: api/account/login
+    [HttpPost("login")] // POST: api/account/login
     public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
     {
-        var user = await userManager.FindByEmailAsync(loginDto.Email); 
+        var user = await userManager.FindByEmailAsync(loginDto.Email);
 
         if (user == null) return Unauthorized("Invalid email address");
 
@@ -59,10 +60,10 @@ public class AccountController(UserManager<AppUser> userManager, ITokenService t
 
         await SetRefreshTokenCookie(user);
 
-       return await user.ToDto(tokenService);   
+        return await user.ToDto(tokenService);
     }
 
-     private async Task SetRefreshTokenCookie(AppUser user)
+    private async Task SetRefreshTokenCookie(AppUser user)
     {
         var refreshToken = tokenService.GenerateRefreshToken();
         user.RefreshToken = refreshToken;
@@ -94,5 +95,20 @@ public class AccountController(UserManager<AppUser> userManager, ITokenService t
         await SetRefreshTokenCookie(user);
 
         return await user.ToDto(tokenService);
+    }
+
+    [Authorize]
+    [HttpPost("logout")]
+    public async Task<ActionResult> Logout()
+    {
+        await userManager.Users
+            .Where(x => x.Id == User.GetMemberId())
+            .ExecuteUpdateAsync(setters => setters.SetProperty(x => x.RefreshToken, _ => null)
+            .SetProperty(x => x.RefreshTokenExpiry, _ => null)
+            );
+
+        Response.Cookies.Delete("refreshToken");
+
+        return Ok();
     }
 }
