@@ -37,7 +37,7 @@ export class MemberPhotos implements OnInit {
         this.memberService.editMode.set(false);
         this.loading.set(false);
         this.photos.update((photos) => [...photos, photo]);
-        if (!this.memberService.member()?.imageUrl) {
+        if (!this.memberService.member()?.imageUrl && photo.isApproved) {
           this.setMainLocalPhoto(photo);
         }
       },

@@ -15,9 +15,10 @@ public class MemberRepository(AppDbContext context) : IMemberRepository
     public async Task<Member?> GetMemberForUpdate(string id)
     {
         return await context.Members
-            .Include(x => x.User)
-            .Include(x => x.Photos)
-            .SingleOrDefaultAsync(x => x.Id == id);
+        .Include(x => x.User)
+        .Include(x => x.Photos)
+        .IgnoreQueryFilters()
+        .SingleOrDefaultAsync(x => x.User.Id == id);
     }
 
     public async Task<PaginatedResult<Member>> GetMembersAsync(MemberParams memberParams)
@@ -38,7 +39,7 @@ public class MemberRepository(AppDbContext context) : IMemberRepository
 
         query = memberParams.OrderBy switch
         {
-            "created" => query.OrderByDescending(x => x.Created), 
+            "created" => query.OrderByDescending(x => x.Created),
             _ => query.OrderByDescending(x => x.LastActive)
         };
 
@@ -53,6 +54,16 @@ public class MemberRepository(AppDbContext context) : IMemberRepository
             .Where(x => x.Id == memberId)
             .SelectMany(x => x.Photos)
             .ToListAsync();
+    }
+
+    public async Task<IEnumerable<Photo>> GetPhotosForMemberAsync(string userId, bool
+        isCurrentUser)
+    {
+        var query = context.Members
+        .Where(x => x.User.Id == userId)
+        .SelectMany(x => x.Photos);
+        if (isCurrentUser) query = query.IgnoreQueryFilters();
+        return await query.ToListAsync();
     }
 
     public async void Update(Member member)
