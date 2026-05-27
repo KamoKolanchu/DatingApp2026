@@ -53,6 +53,7 @@ public class MessageRepository(AppDbContext context) : IMessageRepository
     {
         var query = context.Messages
            .OrderByDescending(x => x.MessageSent)
+           .ExcludeBlocked(context, messageParams.MemberId!)
            .AsQueryable();
 
         query = messageParams.Container switch
@@ -74,6 +75,7 @@ public class MessageRepository(AppDbContext context) : IMessageRepository
         await context.Messages
              .Where(x => x.RecipientId == currentMemberId
                  && x.SenderId == recipientId && x.DateRead == null)
+             .ExcludeBlocked(context, currentMemberId)
              .ExecuteUpdateAsync(setters => setters.SetProperty(x => x.DateRead, DateTime.UtcNow));
 
         return await context.Messages
@@ -84,6 +86,7 @@ public class MessageRepository(AppDbContext context) : IMessageRepository
                  && x.SenderDeleted == false
                  && x.RecipientId == recipientId))
              .OrderBy(x => x.MessageSent)
+             .ExcludeBlocked(context, currentMemberId)
              .Select(MessageExtensions.ToDtoProjection())
              .ToListAsync();
     }

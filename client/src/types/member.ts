@@ -34,3 +34,4 @@ export class MemberParams {
   pageSize = 10;
   orderBy = 'lastActive';
 }
+

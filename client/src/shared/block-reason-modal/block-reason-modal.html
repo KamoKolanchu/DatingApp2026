@@ -1,0 +1,17 @@
+<dialog #modalRef class="modal">
+  <div class="modal-box">
+    <h3 class="text-lg font-bold">{{ title }}</h3>
+    <div class="py-4">
+      <textarea
+        [(ngModel)]="reason"
+        placeholder="Reason for blocking (1-200 characters)"
+        class="textarea textarea-bordered w-full"
+        rows="3"
+      ></textarea>
+    </div>
+    <div class="modal-action">
+      <button (click)="cancel()" class="btn">Cancel</button>
+      <button (click)="confirm()" class="btn btn-error">Block</button>
+    </div>
+  </div>
+</dialog>

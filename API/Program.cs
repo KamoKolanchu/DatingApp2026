@@ -67,7 +67,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 });
 builder.Services.AddAuthorizationBuilder()
     .AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"))
-    .AddPolicy("ModeratePhotoRole", policy => policy.RequireRole("Admin", "Moderator"));
+    .AddPolicy("ModeratePhotoRole", policy => policy.RequireRole("Admin", "Moderator"))
+    .AddPolicy("RequireVIPRole", policy => policy.RequireRole("Vip"));
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

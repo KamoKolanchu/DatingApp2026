@@ -1,6 +1,7 @@
 using API.Entities;
 using API.Helpers;
 using API.Interfaces;
+using API.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data;
@@ -40,13 +41,15 @@ public class LikesRepository(AppDbContext context) : ILikesRepository
             case "liked":
                 result = query
                     .Where(x => x.SourceMemberId == likesParams.MemeberId)
-                    .Select(x => x.TargetMember);
+                    .Select(x => x.TargetMember)
+                    .ExcludeBlocked(context, likesParams.MemeberId);
                 break;
 
             case "likedBy":
                 result = query
                     .Where(x => x.TargetMemberId == likesParams.MemeberId)
-                    .Select(x => x.SourceMember);
+                    .Select(x => x.SourceMember)
+                    .ExcludeBlocked(context, likesParams.MemeberId);
                 break;
 
             default: // mutual
@@ -55,7 +58,8 @@ public class LikesRepository(AppDbContext context) : ILikesRepository
                 result = query
                     .Where(x => x.TargetMemberId == likesParams.MemeberId
                         && likeIds.Contains(x.SourceMemberId))
-                    .Select(x => x.SourceMember);
+                    .Select(x => x.SourceMember)
+                    .ExcludeBlocked(context, likesParams.MemeberId);
                 break;
         }
 

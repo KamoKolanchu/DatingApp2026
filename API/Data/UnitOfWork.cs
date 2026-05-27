@@ -8,6 +8,7 @@ public class UnitOfWork(AppDbContext context) : IUnitOfWork
     private IMemberRepository? _memberRepository;
     private IMessageRepository? _messageRepository;
     private ILikesRepository? _likesRepository;
+    private IBlocksRepository? _blocksRepository;
     private IPhotoRepository? _photoRepository;
 
     public IMemberRepository MemberRepository => _memberRepository 
@@ -18,6 +19,9 @@ public class UnitOfWork(AppDbContext context) : IUnitOfWork
 
     public ILikesRepository LikesRepository => _likesRepository
         ??= new LikesRepository(context);
+
+    public IBlocksRepository BlocksRepository => _blocksRepository
+        ??= new BlocksRepository(context);
 
     public IPhotoRepository PhotoRepository => _photoRepository 
         ??= new PhotoRepository(context);

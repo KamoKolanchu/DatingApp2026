@@ -1,4 +1,5 @@
 using API.Entities;
+using API.Extensions;
 using API.Helpers;
 using API.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -23,7 +24,7 @@ public class MemberRepository(AppDbContext context) : IMemberRepository
 
     public async Task<PaginatedResult<Member>> GetMembersAsync(MemberParams memberParams)
     {
-        var query = context.Members.AsQueryable();
+        var query = context.Members.AsQueryable().ExcludeBlocked(context, memberParams.CurrentMemberId!);
 
         query = query.Where(x => x.Id != memberParams.CurrentMemberId);
 

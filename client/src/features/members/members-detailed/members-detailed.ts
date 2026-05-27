@@ -14,6 +14,7 @@ import { AccountService } from '../../../core/services/account-service';
 import { MemberService } from '../../../core/services/member-service';
 import { PresenceService } from '../../../core/services/presence-service';
 import { LikesService } from '../../../core/services/likes-service';
+import { BlocksService } from '../../../core/services/blocks-service';
 
 @Component({
   selector: 'app-members-detailed',
@@ -23,9 +24,10 @@ import { LikesService } from '../../../core/services/likes-service';
 })
 export class MembersDetailed implements OnInit {
   protected memberService = inject(MemberService);
-  private accountService = inject(AccountService);
+  protected accountService = inject(AccountService);
   protected presenceService = inject(PresenceService); 
   protected likeService = inject(LikesService); 
+  protected blocksServie = inject(BlocksService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   protected title = signal<string | undefined>('Profile');
@@ -34,6 +36,7 @@ export class MembersDetailed implements OnInit {
     return this.accountService.currentUser()?.id === this.routeId();
   });
   protected hasLiked = computed(() => this.likeService.likeIds().includes(this.routeId()!)); 
+  protected isVip = computed(()=> this.accountService.currentUser()?.roles.includes("Vip"));
     
 
   constructor() {
@@ -52,5 +55,12 @@ export class MembersDetailed implements OnInit {
         this.title.set(this.route.firstChild?.snapshot?.title);
       },
     });
+  }
+
+  blockUser():void{
+    const targetMemberId = this.routeId();
+    if(targetMemberId){
+     this.blocksServie.block(targetMemberId, "oh yeah i am blocking");
+    }
   }
 }
