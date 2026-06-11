@@ -12,6 +12,7 @@ export class BlocksService {
   private http = inject(HttpClient);
   blockIds = signal<string[]>([]);
   
+  
 
   block(targetMemberId: string, reason: string) {
     return this.http.post(`${this.baseUrl}blocks/${targetMemberId}`, { reason: reason }).subscribe({

@@ -8,7 +8,6 @@ import {
   RouterOutlet,
 } from '@angular/router';
 import { filter } from 'rxjs';
-import { Member } from '../../../types/member';
 import { AgePipe } from '../../../core/pipes/age-pipe';
 import { AccountService } from '../../../core/services/account-service';
 import { MemberService } from '../../../core/services/member-service';
@@ -46,7 +45,6 @@ export class MembersDetailed implements OnInit {
     
   }
   
-
   ngOnInit(): void {
     this.title.set(this.route.firstChild?.snapshot?.title);
 
